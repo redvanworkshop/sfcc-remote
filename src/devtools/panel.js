@@ -66,7 +66,7 @@ if (typeof io !== 'undefined') {
 
   socket.on('connect_error', error => {
     console.error('SFCC-CLI:', error)
-    socket.disconnect()
+    bus.$emit('REMOTE_TOGGLE', false)
   })
 
   socket.on('message', message => {
@@ -80,6 +80,11 @@ if (typeof io !== 'undefined') {
 
   socket.on('watch', data => {
     console.log('SFCC-CLI: WATCH', data)
+    bus.$emit('LOG_MESSAGE', data)
+  })
+
+  socket.on('log', data => {
+    console.log('SFCC-CLI: LOG', data)
     bus.$emit('LOG_MESSAGE', data)
   })
 

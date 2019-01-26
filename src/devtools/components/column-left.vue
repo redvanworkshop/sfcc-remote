@@ -40,6 +40,11 @@
 </template>
 
 <script>
+/*
+@TODO: Support Enabling/Disabling Client & Instance Logs from Left Column
+@TODO: Show counter for logged message for client
+*/
+
 import browser from 'webextension-polyfill'
 import bus from '../../shared/bus'
 

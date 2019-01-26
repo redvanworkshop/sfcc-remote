@@ -1,8 +1,32 @@
-#  ![icon](./static/icons/48.png) SFCC Remote for SFCC CLI Tool
+#  ![icon](./static/icons/48.png) SFCC Remote
 
-> Chrome, Firefox & Opera Browser Extension - SFCC Remote for SFCC CLI Tool
+> Chrome, Firefox & Opera Browser Extension
 
-**NOTE:** This Extension is currently in development and not ready for use.
+## Installation
+
+This browser extension works in conjunction with our [SFCC CLI Tool](https://github.com/redvanworkshop/sfcc-cli).
+
+The quickest way to setup the CLI Tool would be to run:
+
+```
+npm install -g sfcc-cli
+sfcc setup
+sfcc remote
+```
+
+Then, you can run whatever you need in a new terminal tab, and it will be sent to browser extension:
+
+_Watch for Code Changes_
+
+```
+sfcc watch
+```
+
+_View Log Events_
+
+```
+sfcc log -i customerror,error,warn -l 500 --latest
+```
 
 ## Developers
 

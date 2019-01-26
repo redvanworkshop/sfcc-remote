@@ -1,12 +1,34 @@
 <template>
   <div class="vertical-panes sfcc-remote">
-    <column-left :remoteEnabled="remoteEnabled" :showColumn="showLeft" :counts="counts" :config="config" />
-    <column-main :showLeftColumn="showLeft" :showRightColumn="showRight" @togglePanel="togglePanel" :config="config" :logger="logger" />
-    <column-right :showColumn="showRight" :config="config" />
+    <column-left
+      :remoteEnabled="remoteEnabled"
+      :showColumn="showLeft"
+      :counts="counts"
+      :config="config"
+    />
+    <column-main
+      :showLeftColumn="showLeft"
+      :showRightColumn="showRight"
+      :config="config"
+      :logger="logger"
+      @togglePanel="togglePanel"
+      @clearLog="clearLog"
+    />
+    <column-right
+      :showColumn="showRight"
+      :config="config"
+    />
   </div>
 </template>
 
 <script>
+/*
+@TODO: Add detection for when Socket is on/off and sync to remote
+@TODO: Add detection for when Socket is dropped via terminated CLI
+@TODO: Show details in right column for log entries selected in Main column
+@TODO: Remove debug log statements
+*/
+
 import Split from 'split.js'
 
 import bus from '../shared/bus'
@@ -31,13 +53,7 @@ export default {
     columns: [],
     counts: {},
     config: {},
-    logger: [
-      {type: 'error', client: 'patagonia', instance: 'sandbox', message: './app_storefront_pipelines/cartridge/app_storefront_pipelines.properties', timestamp: new Date().toString()},
-      {type: 'watch', client: 'patagonia', instance: 'sandbox', message: './app_storefront_pipelines/cartridge/app_storefront_pipelines.properties', timestamp: new Date().toString()},
-      {type: 'log', client: 'patagonia', instance: 'sandbox', message: './app_storefront_pipelines/cartridge/app_storefront_pipelines.properties', timestamp: new Date().toString()},
-      {type: 'upload', client: 'patagonia', instance: 'sandbox', message: './app_storefront_pipelines/cartridge/app_storefront_pipelines.properties', timestamp: new Date().toString()},
-      {type: 'upload', client: 'patagonia', instance: 'sandbox', message: './app_storefront_pipelines/cartridge/app_storefront_pipelines.properties', timestamp: new Date().toString()}
-    ]
+    logger: []
   }),
   created () {
     this.bindEvents()
@@ -103,6 +119,9 @@ export default {
         document.querySelectorAll('.gutter')[0].style.display = (document.querySelector('#left').clientWidth > 0) ? 'block' : 'none'
         document.querySelectorAll('.gutter')[1].style.display = (document.querySelector('#right').clientWidth > 0) ? 'block' : 'none'
       }, 100)
+    },
+    clearLog () {
+      this.logger = []
     },
     setColumns () {
       var self = this

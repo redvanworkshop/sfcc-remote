@@ -3,6 +3,10 @@
 </template>
 
 <script>
+/*
+@TODO: Support managing `sfcc setup` via web interface
+*/
+
 import bus from '../shared/bus'
 
 export default {

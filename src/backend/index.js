@@ -11,7 +11,7 @@ let remote = true
 browser.runtime.onInstalled.addListener((request) => {
   if (request.reason === 'install') {
     browser.tabs.create({
-      url: 'https://github.com/redvanworkshop/sfcc-remote'
+      url: 'https://github.com/redvanworkshop/sfcc-remote#installation'
     })
   }
 })

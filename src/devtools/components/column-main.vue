@@ -82,11 +82,15 @@
 
       </div>
 
-      <div class="content-log" :class="{ 'large-list': largeList, 'small-list': !largeList, 'show-details': showDetail }">
-        <div v-if="logger.length === 0">No Entry</div>
+      <div class="content-log" :class="{ 'large-list': largeList, 'small-list': !largeList, 'show-details': showDetail, 'empty': logger.length === 0 }">
+        <div v-if="logger.length === 0" class="no-events">
+          <div><h1>Nothing to See Here</h1></div>
+          <div>Listening for messages from <a href="https://github.com/redvanworkshop/sfcc-remote#installation" target="_blank">sfcc-cli</a></div>
+          <div><i class="devtools-icon refresh"></i></div>
+        </div>
         <ul v-if="logger.length > 0">
           <li class="bb-muted list-row"
-            v-for="(log, index) in logger"
+            v-for="(log, index) in sortedItems"
             :key="index"
             :class="{ 'active': index === selected, [log.type]: true }"
             :data-type="log.type"
@@ -108,9 +112,7 @@
                 {{ log.instance }}
               </span>
 
-              <span class="message">
-                {{ log.message }}
-              </span>
+              <span class="message" v-html="log.message"></span>
 
               <span class="timestamp" :title="new Date(log.timestamp) | moment('dddd, MMMM Do YYYY, h:mm:ss A')" v-if="showDetail">
                 {{ new Date(log.timestamp) | moment('MMM Do, h:mm:ss A') }}
@@ -124,9 +126,16 @@
 </template>
 
 <script>
+/*
+@TODO: Add detection for when Socket is on/off and sync to remote
+@TODO: Add detection for when Socket is dropped via terminated CLI
+@TODO: Fix main column width issue for log list messing up left/right columns
+@TODO: Show details in right column for log entries selected in Main column
+@TODO: Add support to enable/disable page reload on watch updates
+@TODO: Remove debug log statements
+@TODO: Update Select lists in Filter to be something that is more useful
+*/
 import browser from 'webextension-polyfill'
-
-import bus from '../../shared/bus'
 
 export default {
   name: 'ColumnMain',
@@ -146,6 +155,7 @@ export default {
   },
   data: () => ({
     selected: null,
+    logList: [],
     largeList: false,
     showDetail: true,
     showSearch: false,
@@ -164,9 +174,7 @@ export default {
     }
   }),
   mounted () {
-    bus.$on('TRACK_REQUEST', (request) => {
-      this.logger.unshift(request)
-    })
+    this.logList = this.logger
   },
   computed: {
     getThemeName () {
@@ -174,6 +182,12 @@ export default {
     },
     filtersApplied () {
       return (this.filter.type !== 'all' || this.filter.client !== 'all' || this.filter.instance !== 'all' || this.filter.search !== '')
+    },
+    sortedItems () {
+      this.logList.sort((a, b) => {
+        return new Date(a.timestamp) - new Date(b.timestamp)
+      })
+      return this.logList.slice().reverse()
     }
   },
   methods: {
@@ -200,7 +214,7 @@ export default {
     },
     clearLog () {
       this.$emit('clearLog')
-      this.logger = []
+      this.logList = []
     },
     filterLog () {
       this.showFilter = !this.showFilter
@@ -419,10 +433,35 @@ export default {
   .content-log {
     font-weight: 500;
 
+    .message {
+      strong {
+        &.log {
+          color: #37a655;
+        }
+        &.error {
+          color: #DB4437;
+        }
+        &.warn {
+          color: #F4B400;
+        }
+        &.info {
+          color: #4285f0;
+        }
+      }
+    }
+
+    &.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
     &.large-list {
       li {
         height: 51px;
         line-height: 50px;
+        overflow: hidden;
 
         div {
           margin: 0 14px;
@@ -437,6 +476,7 @@ export default {
       li {
         height: 31px;
         line-height: 30px;
+        overflow: hidden;
 
         div {
           margin: 0 6px;
@@ -526,5 +566,34 @@ export default {
       }
     }
   }
+
+  .no-events {
+    text-align: center;
+
+    h1 {
+      font-weight: 400;
+      font-size: 26px;
+    }
+
+    div {
+      width: 100%;
+      display: block;
+      line-height: 32px;
+    }
+
+    a {
+      color: #4285f0;
+      text-decoration: none;
+    }
+
+    .devtools-icon {
+      animation: spin 2s infinite linear;
+      background-color: #4285f0 !important;
+    }
+  }
+}
+@keyframes spin {
+  from {transform:rotate(0deg);}
+  to {transform:rotate(360deg);}
 }
 </style>
