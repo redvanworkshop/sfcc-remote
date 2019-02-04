@@ -39,6 +39,8 @@ SSL Certificates
 https://localhost:8443/socket.io/socket.io.js
 ```
 
+<details><summary>Get Help</summary>
+
 `localhost` certificates are kind of flakey, and you might see something like this, which is normal. Just click through that first time to `Always Trust` the certificate to avoid future headaches.
 
 ![Error](https://github.com/redvanworkshop/sfcc-cli/raw/master/docs/img/ssl-error.png "Error")
@@ -46,6 +48,7 @@ https://localhost:8443/socket.io/socket.io.js
 
 Once you've confirmed you can access the `socket.io.js` file in your browser, you are good to go.
 
+</details>
 
 Developers
 ---
