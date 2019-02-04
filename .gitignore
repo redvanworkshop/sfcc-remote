@@ -14,5 +14,5 @@ build
 # NPM Token
 .npmrc
 
-# Ignore Extension Builds
-*.zip
+# Ignore Key File
+key.pem

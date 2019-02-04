@@ -6,6 +6,6 @@
     "manifest.json"
   ],
   "options": {
-    "output": "../firefox.zip"
+    "output": "../dist/firefox-addon.zip"
   }
 }

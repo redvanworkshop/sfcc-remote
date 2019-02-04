@@ -2,7 +2,8 @@
 
 > Chrome, Firefox & Opera Browser Extension
 
-## Installation
+Installation
+---
 
 This browser extension works in conjunction with our [SFCC CLI Tool](https://github.com/redvanworkshop/sfcc-cli).
 
@@ -29,6 +30,23 @@ sfcc log -i customerror,error,warn -l 500 --latest
 ```
 
 
+SSL Certificates
+---
+
+**IMPORTANT:** After running `sfcc remote`, check that you can access the following URL in your browser:
+
+```
+https://localhost:8443/socket.io/socket.io.js
+```
+
+`localhost` certificates are kind of flakey, and you might see something like this, which is normal. Just click through that first time to `Always Trust` the certificate to avoid future headaches.
+
+![Error](https://github.com/redvanworkshop/sfcc-cli/raw/master/docs/img/ssl-error.png "Error")
+![Error](https://github.com/redvanworkshop/sfcc-cli/raw/master/docs/img/ssl-error-accept.png "Error")
+
+Once you've confirmed you can access the `socket.io.js` file in your browser, you are good to go.
+
+
 Developers
 ---
 
@@ -39,6 +57,7 @@ git clone git@github.com:manifestinteractive/sfcc-remote.git
 cd sfcc-remote
 npm install
 npm run build
+npm run pack
 ```
 
 </details>
@@ -71,5 +90,14 @@ npm run build
 3. In the top right corner, Enable **Developer Mode**
 4. Click the **Load Unpacked Extension ...**
 5. Select the `./sfcc-remote/build` folder
+
+</details>
+
+<details><summary>Pack Extensions</summary>
+
+```bash
+cd sfcc-remote
+npm run pack
+```
 
 </details>
