@@ -47,7 +47,7 @@ module.exports = merge(baseWebpack, {
     }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest',
-      chunks: ['vendor']
+      chunks: ['vendor', 'vendor.js']
     })
   ]
 })

@@ -35,7 +35,7 @@ module.exports = {
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
         enforce: 'pre',
-        include: [path.join(__dirname, '..', 'src'), path.join(__dirname, '..', 'test')],
+        include: [path.join(__dirname, '..', 'src')],
         options: {
           formatter: require('eslint-friendly-formatter')
         }
@@ -60,7 +60,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include:  [path.join(__dirname, '..', 'src'), path.join(__dirname, '..', 'test')],
+        include:  [path.join(__dirname, '..', 'src')],
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -89,10 +89,10 @@ module.exports = {
     ]
   },
   plugins: [
-    htmlPage('home', 'app', ['manifest', 'vendor', 'tab']),
-    htmlPage('panel', 'panel', ['manifest', 'vendor', 'panel']),
-    htmlPage('devtools', 'devtools', ['manifest', 'vendor', 'devtools']),
-    htmlPage('options', 'options', ['manifest', 'vendor', 'options']),
+    htmlPage('home', 'app', ['tab']),
+    htmlPage('panel', 'panel', ['panel']),
+    htmlPage('devtools', 'devtools', ['devtools']),
+    htmlPage('options', 'options', ['options']),
     htmlPage('background', 'background', ['manifest', 'vendor', 'background']),
     new CopyWebpackPlugin([{ from: path.join(__dirname, '..', 'static') }]),
     new ChromeReloadPlugin({

@@ -33,6 +33,8 @@ module.exports = {
   content_scripts: [
     {
       js: [
+        'js/manifest.js',
+        'js/vendor.js',
         'js/inject.js'
       ],
       run_at: 'document_start',
@@ -43,7 +45,7 @@ module.exports = {
       all_frames: true
     }
   ],
-  content_security_policy: "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://localhost:8443; object-src 'self'",
+  content_security_policy: "script-src 'self' 'unsafe-eval' https://localhost:8443; object-src 'self'",
   web_accessible_resources: [
     'panel.html',
     'js/content.js',
