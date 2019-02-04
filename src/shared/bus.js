@@ -1,6 +1,9 @@
 import Vue from 'vue'
 
 const bus = new Vue({
+  data: () => ({
+    config: null
+  }),
   methods: {
     initPopup () {
       console.log('INIT_POPUP')
@@ -25,6 +28,12 @@ const bus = new Vue({
         get: request.get_params,
         post: request.post_params
       })
+    },
+    setConfig (config) {
+      this.config = config
+    },
+    getConfig () {
+      return this.config
     }
   }
 })

@@ -1,30 +1,33 @@
 <template>
   <div class="vertical-panes sfcc-remote">
     <column-left
+      :config="config"
+      :counts="counts"
       :remoteEnabled="remoteEnabled"
       :showColumn="showLeft"
-      :counts="counts"
-      :config="config"
+      :socketConnected="socketConnected"
     />
     <column-main
-      :showLeftColumn="showLeft"
-      :showRightColumn="showRight"
       :config="config"
       :logger="logger"
+      :remoteEnabled="remoteEnabled"
+      :showLeftColumn="showLeft"
+      :showRightColumn="showRight"
+      :socketConnected="socketConnected"
       @togglePanel="togglePanel"
       @clearLog="clearLog"
     />
     <column-right
-      :showColumn="showRight"
       :config="config"
+      :remoteEnabled="remoteEnabled"
+      :showColumn="showRight"
+      :socketConnected="socketConnected"
     />
   </div>
 </template>
 
 <script>
 /*
-@TODO: Add detection for when Socket is on/off and sync to remote
-@TODO: Add detection for when Socket is dropped via terminated CLI
 @TODO: Show details in right column for log entries selected in Main column
 @TODO: Remove debug log statements
 */
@@ -45,6 +48,7 @@ export default {
     ColumnRight
   },
   data: () => ({
+    socketConnected: false,
     remoteEnabled: true,
     instance: null,
     showLeft: true,
@@ -92,11 +96,9 @@ export default {
 
       // bus.$off('REMOTE_TOGGLE')
       bus.$on('REMOTE_TOGGLE', (enabled) => {
-        this.remoteEnabled = enabled
         console.log('REMOTE_TOGGLE', enabled)
       })
 
-      bus.$off('REMOTE_SET_CONFIG')
       bus.$on('REMOTE_SET_CONFIG', (config) => {
         this.config = config
       })
@@ -104,6 +106,20 @@ export default {
       bus.$off('LOG_MESSAGE')
       bus.$on('LOG_MESSAGE', (message) => {
         this.logger.push(message)
+      })
+
+      bus.$off('SOCKET_CONNECTED')
+      bus.$on('SOCKET_CONNECTED', () => {
+        this.remoteEnabled = true
+        this.socketConnected = true
+        console.log('SOCKET_CONNECTED')
+      })
+
+      bus.$off('SOCKET_DISCONNECTED')
+      bus.$on('SOCKET_DISCONNECTED', () => {
+        this.remoteEnabled = false
+        this.socketConnected = false
+        console.log('SOCKET_DISCONNECTED')
       })
     },
     togglePanel (col) {
@@ -138,12 +154,12 @@ export default {
           }
 
           return {
-            'flex-basis': panelWidth + 'px'
+            'flex-basis': panelWidth + 'px !important'
           }
         },
         gutterStyle: function (dimension, gutterSize) {
           return {
-            'flex-basis': gutterSize + 'px'
+            'flex-basis': gutterSize + 'px !important'
           }
         },
         onDragEnd: function () {
@@ -225,7 +241,7 @@ a, button {
 
   #center {
     flex-grow: 1;
-    flex-basis: unset !important;
+    flex-basis: 200px;
   }
 
   header {

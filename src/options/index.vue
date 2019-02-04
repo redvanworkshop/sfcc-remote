@@ -1,5 +1,5 @@
 <template>
-  <div>options</div>
+  <div>options {{ config }}</div>
 </template>
 
 <script>
@@ -10,13 +10,17 @@
 import bus from '../shared/bus'
 
 export default {
-  data: () => ({}),
+  data: () => ({
+    config: null
+  }),
   computed: {},
   created () {
     this.bindEvents()
   },
   mounted () {
     bus.initOptions()
+    this.config = bus.getConfig()
+    console.log('this.config', this.config)
   },
   methods: {
     bindEvents () {
@@ -24,12 +28,19 @@ export default {
       bus.$on('INIT_OPTIONS', (data) => {
         console.log('RECEIVED_INIT_OPTIONS', data)
       })
+
+      bus.$on('REMOTE_SET_CONFIG', (data) => {
+        console.log('REMOTE_SET_CONFIG', data)
+        this.config = data
+      })
     }
   }
 }
 </script>
 
-<style>
+<style lang="scss">
+@import '../shared/app';
+
 div {
   color: blue
 }

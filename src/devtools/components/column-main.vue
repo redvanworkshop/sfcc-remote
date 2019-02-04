@@ -83,11 +83,24 @@
       </div>
 
       <div class="content-log" :class="{ 'large-list': largeList, 'small-list': !largeList, 'show-details': showDetail, 'empty': logger.length === 0 }">
-        <div v-if="logger.length === 0" class="no-events">
+        <div v-if="remoteEnabled && socketConnected && logger.length === 0" class="no-events">
           <div><h1>Nothing to See Here</h1></div>
           <div>Listening for messages from <a href="https://github.com/redvanworkshop/sfcc-remote#installation" target="_blank">sfcc-cli</a></div>
           <div><i class="devtools-icon refresh"></i></div>
         </div>
+
+        <div v-if="!remoteEnabled && socketConnected" class="no-events">
+          <div><h1>Remote Disabled</h1></div>
+          <div>Messages from <a href="https://github.com/redvanworkshop/sfcc-remote#installation" target="_blank">sfcc-cli</a> paused</div>
+          <div><a href="javascript:void(0)" @click="enableRemote"><i class="devtools-icon play-circle"></i> Enable</a></div>
+        </div>
+
+        <div v-if="!socketConnected" class="no-events">
+          <div><h1>Remote Disconnected</h1></div>
+          <div>Unable to connect to <a href="https://github.com/redvanworkshop/sfcc-remote#installation" target="_blank">sfcc-cli</a></div>
+          <div><a href="javascript:void(0)" @click="reload"><i class="devtools-icon rewind"></i> Reload</a></div>
+        </div>
+
         <ul v-if="logger.length > 0">
           <li class="bb-muted list-row"
             v-for="(log, index) in sortedItems"
@@ -97,7 +110,7 @@
             :data-client="log.client"
             :data-instance="log.instance"
             v-if="filteredLogs(log)"
-            @click="showDetails(index)"
+            @click="showDetails(index, log)"
           >
             <div>
               <span class="type" :class="log.type">
@@ -127,15 +140,13 @@
 
 <script>
 /*
-@TODO: Add detection for when Socket is on/off and sync to remote
-@TODO: Add detection for when Socket is dropped via terminated CLI
-@TODO: Fix main column width issue for log list messing up left/right columns
-@TODO: Show details in right column for log entries selected in Main column
 @TODO: Add support to enable/disable page reload on watch updates
 @TODO: Remove debug log statements
 @TODO: Update Select lists in Filter to be something that is more useful
 */
 import browser from 'webextension-polyfill'
+
+import bus from '../../shared/bus'
 
 export default {
   name: 'ColumnMain',
@@ -150,6 +161,14 @@ export default {
     },
     logger: {
       type: Array,
+      default: false
+    },
+    remoteEnabled: {
+      type: Boolean,
+      default: false
+    },
+    socketConnected: {
+      type: Boolean,
       default: false
     }
   },
@@ -214,6 +233,7 @@ export default {
     },
     clearLog () {
       this.$emit('clearLog')
+      bus.$emit('showDetails', null)
       this.logList = []
     },
     filterLog () {
@@ -236,7 +256,8 @@ export default {
         this.$emit('hideSearch')
       }
     },
-    showDetails (id) {
+    showDetails (id, log) {
+      bus.$emit('showDetails', (this.selected === id) ? null : log)
       this.selected = (this.selected === id) ? null : id
     },
     filteredLogs (log) {
@@ -314,6 +335,15 @@ export default {
       this.filter.search = ''
       this.filter.regexp = false
       this.validRegExp = true
+    },
+    reload () {
+      window.location.reload()
+    },
+    enableRemote () {
+      if (this.socketConnected) {
+        bus.$emit('REMOTE_TOGGLE', true)
+        browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: true }).then(console.log, console.error)
+      }
     }
   }
 }
@@ -587,8 +617,15 @@ export default {
     }
 
     .devtools-icon {
-      animation: spin 2s infinite linear;
       background-color: #4285f0 !important;
+
+      &.refresh {
+        animation: spin 2s infinite linear;
+      }
+
+      line-height: 24px;
+      display: inline-block;
+      vertical-align: middle;
     }
   }
 }

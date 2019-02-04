@@ -27,24 +27,39 @@ browser.runtime.onMessage.addListener(async (request) => {
   } else if (request.type === 'sfcc-remote-panel-message') {
     bus.$emit('ADP_PANEL_MESSAGE', request.message)
   } else if (request.type === 'sfcc-remote-toggle') {
-    bus.$emit('REMOTE_TOGGLE', request.enabled)
+    if (typeof io !== 'undefined') {
+      bus.$emit('REMOTE_TOGGLE', request.enabled)
+    } else {
+      bus.$emit('REMOTE_TOGGLE', false)
+      browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: false }).then(console.log, console.error)
+    }
   }
 })
 
 browser.storage.local.get().then(store => {
-  console.log('ENABLED', store['sfcc-remote-enabled'])
-  bus.$emit('REMOTE_TOGGLE', store['sfcc-remote-enabled'])
+  if (typeof io !== 'undefined') {
+    bus.$emit('REMOTE_TOGGLE', store['sfcc-remote-enabled'])
+  }
 })
 
+var socket = null
+var connected = false
+
 if (typeof io !== 'undefined') {
-  var socket = io('https://localhost:8443')
-  var connected = false
+  try {
+    socket = io('https://localhost:8443')
+  } catch (err) {
+    console.log('SFCC-CLI: NOT CONNECTED', err)
+  }
 
   bus.$on('REMOTE_TOGGLE', (enabled) => {
-    if (!connected && enabled) {
+    if (socket && !connected && enabled) {
       socket.connect()
-    } else if (connected && !enabled) {
+    } else if (socket && connected && !enabled) {
       socket.disconnect()
+    } else if (!socket) {
+      bus.$emit('SOCKET_DISCONNECTED')
+      browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: false }).then(console.log, console.error)
     }
   })
 
@@ -52,11 +67,15 @@ if (typeof io !== 'undefined') {
   socket.on('connect', () => {
     console.log('SFCC-CLI: CONNECTED')
     socket.emit('get-config')
+    bus.$emit('SOCKET_CONNECTED')
+    browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: true }).then(console.log, console.error)
     connected = true
   })
 
   socket.on('disconnect', () => {
     console.log('SFCC-CLI: DISCONNECTED')
+    bus.$emit('SOCKET_DISCONNECTED')
+    browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: false }).then(console.log, console.error)
     connected = false
   })
 
@@ -76,6 +95,7 @@ if (typeof io !== 'undefined') {
   socket.on('set-config', config => {
     console.log('SFCC-CLI: CONFIG ', config)
     bus.$emit('REMOTE_SET_CONFIG', config)
+    bus.setConfig(config)
   })
 
   socket.on('watch', data => {
@@ -93,6 +113,16 @@ if (typeof io !== 'undefined') {
     if (updated) {
       console.log('SFCC-CLI: Reloading ...')
       window.location.reload(true)
+    }
+  })
+} else {
+  bus.$emit('SOCKET_DISCONNECTED')
+  browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: false }).then(console.log, console.error)
+
+  bus.$on('REMOTE_TOGGLE', (enabled) => {
+    if (!socket) {
+      bus.$emit('SOCKET_DISCONNECTED')
+      browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: false }).then(console.log, console.error)
     }
   })
 }

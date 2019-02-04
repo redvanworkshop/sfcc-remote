@@ -2,8 +2,8 @@
   <transition name="slide-fade">
     <div class="pane" id="left" v-show="showColumn">
       <header>
-        <button class="toolbar-icon" @click="toggleRecord" :aria-label="remoteEnabled ? 'Remote is On' : 'Remote is Off'" aria-pressed="false">
-          <i class="devtools-icon" :class="remoteEnabled ? 'recording' : 'record'"></i>
+        <button class="toolbar-icon" @click="toggleRecord" :aria-label="(remoteEnabled && socketConnected) ? 'Remote is On' : 'Remote is Off'" aria-pressed="false">
+          <i class="devtools-icon" :class="(remoteEnabled && socketConnected) ? 'recording' : 'record'"></i>
         </button>
 
         <button class="toolbar-icon" @click="toggleFilter" aria-label="Filter" aria-pressed="false">
@@ -42,7 +42,7 @@
 <script>
 /*
 @TODO: Support Enabling/Disabling Client & Instance Logs from Left Column
-@TODO: Show counter for logged message for client
+@TODO: Show counter for logged message for
 */
 
 import browser from 'webextension-polyfill'
@@ -52,6 +52,10 @@ export default {
   name: 'ColumnLeft',
   props: {
     remoteEnabled: {
+      type: Boolean,
+      default: false
+    },
+    socketConnected: {
       type: Boolean,
       default: false
     },
@@ -77,8 +81,10 @@ export default {
       return this.filters.indexOf(index) > -1
     },
     toggleRecord () {
-      bus.$emit('REMOTE_TOGGLE', !this.remoteEnabled)
-      browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: !this.remoteEnabled }).then(console.log, console.error)
+      if (this.socketConnected) {
+        bus.$emit('REMOTE_TOGGLE', !this.remoteEnabled)
+        browser.runtime.sendMessage({ type: 'sfcc-remote', enabled: !this.remoteEnabled }).then(console.log, console.error)
+      }
     },
     toggleFilter () {
       this.filtering = !this.filtering
